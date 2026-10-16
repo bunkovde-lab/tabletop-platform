@@ -1,0 +1,27 @@
+name: Build TABLETOP Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.4.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import Godot project
+        run: godot --headless --path . --editor --quit
+      - name: Export Android debug APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Android" build/TABLETOP-debug.apk
+          test -s build/TABLETOP-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TABLETOP-Android-debug
+          path: build/TABLETOP-debug.apk
+          if-no-files-found: error
